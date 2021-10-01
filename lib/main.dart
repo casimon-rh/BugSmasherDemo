@@ -1,8 +1,29 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import './BugWidget.dart';
+import 'widgets/Bug.dart';
+import 'service/service_locator.dart';
+import 'widgets/LoginDialog.dart';
+import 'widgets/Score.dart';
 
-void main() => runApp(MyApp());
+void main() {
+  setupServiceLocator();
+  runApp(MyHome());
+}
+
+class MyHome extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+        title: 'Crusher',
+        theme:
+            ThemeData(primaryColor: Colors.red, accentColor: Colors.redAccent),
+        home: Scaffold(
+            appBar: AppBar(
+              title: const Text('OCP Smasher'),
+            ),
+            body: MyApp()));
+  }
+}
 
 class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -15,38 +36,40 @@ class _MyAppState extends State<MyApp> {
   int _crushCount = 0;
   int _start = 40;
   int _starts = 20;
-
-  List<BugWidget> bugs = [];
+  String _token = '';
+  bool flag = true;
+  List<Bug> bugs = [];
 
   late Timer _timer;
-
-  void _reduce(int numb) {
-    _start--;
-    if (numb.isEven) _starts--;
-    bugs.add(new BugWidget(
-      onChanged: _crush,
-    ));
-  }
 
   void restartTimer() {
     setState(() {
       _start = 40;
       _starts = 20;
       _crushCount = 0;
+      bugs.clear();
     });
-    startTimer();
-  }
-
-  void startTimer() {
     _timer = Timer.periodic(const Duration(milliseconds: 500), (timer) {
       if (_start == 0) {
-        setState(() {
-          timer.cancel();
-          bugs.clear();
-        });
+        cancel();
       } else {
-        setState(() => _reduce(_start));
+        setState(() {
+          _start--;
+          if (_start.isEven) _starts--;
+          bugs.add(new Bug(
+            onChanged: (bool crushed) => setState(() {
+              _crushCount += 1;
+            }),
+          ));
+        });
       }
+    });
+  }
+
+  void cancel() {
+    setState(() {
+      _timer.cancel();
+      bugs.clear();
     });
   }
 
@@ -56,49 +79,43 @@ class _MyAppState extends State<MyApp> {
     super.dispose();
   }
 
-  void _crush(bool crushed) => setState(() {
-        _crushCount += 1;
-      });
-
   @override
   void initState() {
     super.initState();
-    startTimer();
   }
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    Widget scoreSection = Container(
-      padding: const EdgeInsets.all(32),
-      child: Row(
-        children: [
-          Icon(
-            Icons.bug_report,
-            color: Colors.blueAccent,
-          ),
-          Text("$_crushCount"),
-          const Text(' Bugs Crushed | | '),
-          Text("$_starts "),
-          TextButton(onPressed: restartTimer, child: const Text("Reiniciar"))
-        ],
-      ),
-    );
-    return MaterialApp(
-        title: 'Crusher',
-        home: Scaffold(
-            appBar: AppBar(
-              title: const Text('Bug crushing'),
+    if (flag) {
+      Future.delayed(
+          Duration.zero,
+          () => showDialog(
+              context: context,
+              builder: (context) => LoginDialog(onChanged: (String t) {
+                    _token = t;
+                    restartTimer();
+                  })));
+      flag = false;
+    }
+    return Stack(
+      children: [
+        Container(
+            child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(32),
+              child: Score(
+                cancel: cancel,
+                crushCount: _crushCount,
+                starts: _starts,
+                restartTimer: restartTimer,
+              ),
             ),
-            body: Stack(
-              children: [
-                Container(
-                  child: Column(
-                    children: [scoreSection],
-                  ),
-                ),
-                ...bugs
-              ],
-            )));
+          ],
+        )),
+        ...bugs
+      ],
+    );
   }
 }

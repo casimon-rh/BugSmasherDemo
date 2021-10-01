@@ -2,8 +2,8 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
-class BugWidget extends StatefulWidget {
-  const BugWidget({
+class Bug extends StatefulWidget {
+  const Bug({
     Key? key,
     this.isCrushed = false,
     required this.onChanged,
@@ -13,13 +13,12 @@ class BugWidget extends StatefulWidget {
   final ValueChanged<bool> onChanged;
 
   @override
-  _BugWidgetState createState() => _BugWidgetState();
+  _BugState createState() => _BugState();
 }
 
-class _BugWidgetState extends State<BugWidget>
-    with SingleTickerProviderStateMixin {
+class _BugState extends State<Bug> with SingleTickerProviderStateMixin {
   bool isCrushed = false;
-  final int random = Random().nextInt(5) + 1;
+  final int random = Random().nextInt(6);
   late final AnimationController _controller = AnimationController(
     duration: const Duration(seconds: 3),
     vsync: this,
@@ -40,13 +39,12 @@ class _BugWidgetState extends State<BugWidget>
 
   @override
   Widget build(BuildContext context) {
-    const double smallLogo = 200;
+    const double smallLogo = 150;
 
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         final Size biggest = constraints.biggest;
-        final double middle = biggest.width / 2 - smallLogo;
-        final double randomWidth = biggest.width / random - smallLogo;
+        final double randomWidth = (biggest.width / 4 - smallLogo / 2) * random;
         return Stack(
           children: <Widget>[
             PositionedTransition(
@@ -71,8 +69,8 @@ class _BugWidgetState extends State<BugWidget>
                           shadowColor: Colors.transparent),
                       child: Image.asset(
                           isCrushed ? 'images/fire.png' : 'images/bug.png',
-                          width: 200,
-                          height: 200,
+                          width: smallLogo,
+                          height: smallLogo,
                           fit: BoxFit.fill))),
             ),
           ],
