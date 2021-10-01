@@ -3,11 +3,15 @@ import './OcpService.dart';
 
 class OcpServiceFake extends OcpService {
   @override
-  Future<void> deletePod(String url, String token, String name) async {}
+  Future<void> deletePod(String? url, String? token, String name) async {}
 
   @override
   Future<List<Pod>> getPods(String url, String token) async {
-    return new List<Pod>.empty();
+    return [
+      new Pod(isRunning: true, name: "a", runtime: "java"),
+      new Pod(isRunning: true, name: "b", runtime: "java"),
+      new Pod(isRunning: true, name: "c", runtime: "java")
+    ];
   }
 
   @override

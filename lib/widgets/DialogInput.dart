@@ -3,14 +3,14 @@ import 'package:flutter/material.dart';
 class DialogInput extends StatelessWidget {
   const DialogInput(
       {Key? key,
-      this.controller,
-      this.label,
+      required this.controller,
+      required this.label,
       this.pass = false,
       this.autofocus = false})
       : super(key: key);
 
-  final TextEditingController? controller;
-  final String? label;
+  final TextEditingController controller;
+  final String label;
   final bool pass;
   final bool autofocus;
   @override

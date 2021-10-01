@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
+import '../dto/Request.dart';
 import '../service/OcpService.dart';
 import '../service/service_locator.dart';
 import 'DialogInput.dart';
 
 class LoginDialog extends StatefulWidget {
-  const LoginDialog({Key? key, this.token = '', required this.onChanged})
-      : super(key: key);
+  const LoginDialog({Key? key, required this.onChanged}) : super(key: key);
 
-  final String token;
-  final ValueChanged<String> onChanged;
+  final ValueChanged<Request> onChanged;
   @override
   LoginDialogState createState() {
     return LoginDialogState();
@@ -28,7 +27,7 @@ class LoginDialogState extends State<LoginDialog> {
   }
 
   void _saveToken() {
-    widget.onChanged(token);
+    widget.onChanged(Request(token: token, url: urlController.text));
   }
 
   OcpService service = getIt<OcpService>();
@@ -69,6 +68,7 @@ class LoginDialogState extends State<LoginDialog> {
                           );
                         } else {
                           _saveToken();
+                          clearForm();
                           Navigator.of(context).pop();
                         }
                       }

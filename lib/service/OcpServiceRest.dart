@@ -24,11 +24,11 @@ class OcpServiceRest extends OcpService {
     try {
       Response res = await get(Uri.parse(url), headers: headers);
       if (res.statusCode == 401)
-        return new List<Pod>.generate(0, (index) => Pod());
+        return [new Pod(isRunning: true, name: "a", runtime: "java")];
       return jsonDecode(res.body);
     } catch (e) {
       print('Caught error: $e');
-      return new List<Pod>.generate(0, (index) => Pod());
+      return [new Pod(isRunning: true, name: "a", runtime: "java")];
     }
   }
 

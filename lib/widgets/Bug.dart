@@ -1,23 +1,27 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import '../dto/Pod.dart';
 
 class Bug extends StatefulWidget {
-  const Bug({
-    Key? key,
-    this.isCrushed = false,
-    required this.onChanged,
-  }) : super(key: key);
+  const Bug(
+      {Key? key,
+      this.isCrushed = false,
+      required this.onChanged,
+      required this.pod})
+      : super(key: key);
 
   final bool isCrushed;
-  final ValueChanged<bool> onChanged;
+  final ValueChanged<Pod> onChanged;
+  final Pod pod;
 
   @override
-  _BugState createState() => _BugState();
+  _BugState createState() => _BugState(pod: pod);
 }
 
 class _BugState extends State<Bug> with SingleTickerProviderStateMixin {
-  bool isCrushed = false;
+  _BugState({required this.pod}) : super();
+  final Pod pod;
   final int random = Random().nextInt(6);
   late final AnimationController _controller = AnimationController(
     duration: const Duration(seconds: 3),
@@ -25,10 +29,12 @@ class _BugState extends State<Bug> with SingleTickerProviderStateMixin {
   )..forward();
 
   void _crush() {
-    if (!isCrushed) widget.onChanged(isCrushed);
-    setState(() {
-      if (!isCrushed) isCrushed = true;
-    });
+    if (pod.isRunning) {
+      setState(() {
+        pod.isRunning = false;
+      });
+      widget.onChanged(pod);
+    }
   }
 
   @override
@@ -39,7 +45,7 @@ class _BugState extends State<Bug> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    const double smallLogo = 150;
+    const double smallLogo = 100;
 
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
@@ -50,7 +56,7 @@ class _BugState extends State<Bug> with SingleTickerProviderStateMixin {
             PositionedTransition(
               rect: RelativeRectTween(
                 begin: RelativeRect.fromSize(
-                    Rect.fromLTWH(randomWidth, 0, smallLogo, smallLogo),
+                    Rect.fromLTWH(randomWidth, smallLogo, smallLogo, smallLogo),
                     biggest),
                 end: RelativeRect.fromSize(
                     Rect.fromLTWH(randomWidth, biggest.height + smallLogo,
@@ -68,7 +74,7 @@ class _BugState extends State<Bug> with SingleTickerProviderStateMixin {
                           primary: Colors.transparent,
                           shadowColor: Colors.transparent),
                       child: Image.asset(
-                          isCrushed ? 'images/fire.png' : 'images/bug.png',
+                          pod.isRunning ? 'images/bug.png' : 'images/fire.png',
                           width: smallLogo,
                           height: smallLogo,
                           fit: BoxFit.fill))),
