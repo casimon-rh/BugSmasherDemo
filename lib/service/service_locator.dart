@@ -8,6 +8,6 @@ import 'package:get_it/get_it.dart';
 final getIt = GetIt.instance;
 
 setupServiceLocator() {
-  getIt.registerLazySingleton<OcpService>(() => OcpServiceFake());
-  // getIt.registerLazySingleton<OcpService>(() => OcpServiceRest());
+  // getIt.registerLazySingleton<OcpService>(() => OcpServiceFake());
+  getIt.registerLazySingleton<OcpService>(() => OcpServiceRest());
 }

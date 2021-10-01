@@ -9,7 +9,9 @@ class OcpServiceRest extends OcpService {
   Future<void> deletePod(String url, String token, String name) async {
     Map<String, String> headers = {'Authorization': token};
     try {
-      await delete(Uri.parse(url + "/$name"), headers: headers);
+      print("deleting: $name");
+      Response r = await delete(Uri.parse(url + "/pod/$name"), headers: headers);
+      print(r.statusCode);
     } catch (e) {
       print('Caught error: $e');
     }
@@ -22,10 +24,16 @@ class OcpServiceRest extends OcpService {
       'Authorization': token
     };
     try {
-      Response res = await get(Uri.parse(url), headers: headers);
+      Response res = await get(Uri.parse("$url/pods"), headers: headers);
       if (res.statusCode == 401)
         return [new Pod(isRunning: true, name: "a", runtime: "java")];
-      return jsonDecode(res.body);
+      List<dynamic> results = jsonDecode(res.body);
+      List<Pod> myresults = results
+          .map((e) =>
+              Pod(isRunning: e['isRunning'], name: e['name']))
+          .where((element) => element.isRunning)
+          .toList();
+      return myresults;
     } catch (e) {
       print('Caught error: $e');
       return [new Pod(isRunning: true, name: "a", runtime: "java")];
@@ -34,10 +42,14 @@ class OcpServiceRest extends OcpService {
 
   @override
   Future<String> login(String url, String usr, String pass) async {
-    Map<String, String> headers = {'Content-type': 'application/json'};
-    String json = '{"user":$usr,"pass":$pass}';
+    Map<String, String> headers = {
+      'Content-type': 'application/json',
+      'Access-Control-Allow-Origin': '*'
+    };
+    String json = '{"user":"$usr","pass":"$pass"}';
     try {
-      Response res = await post(Uri.parse(url), headers: headers, body: json);
+      Response res =
+          await post(Uri.parse("$url/auth"), headers: headers, body: json);
       if (res.statusCode != 200) return "";
       return res.body;
     } catch (e) {
